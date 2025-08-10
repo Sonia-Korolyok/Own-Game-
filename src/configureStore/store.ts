@@ -1,7 +1,8 @@
 import {legacy_createStore as createStore} from "redux";
 import {userReducer} from "../reducers/userReducer.ts";
 import type {StateInterface} from "../utils/types.ts";
-import {composeWithDevTools} from "@redux-devtools/extension";
+import { composeWithDevTools } from '@redux-devtools/extension';
+
 
 const enhancer = import.meta.env.DEV ? composeWithDevTools() : undefined;
 
