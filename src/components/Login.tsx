@@ -8,19 +8,19 @@ const Login = () => {
     const userName = useRef<HTMLInputElement>(null);
 
     function handleSetNickName() {
-        dispatch(changeLogin(userName.current?.value || "guest"));
+        dispatch(changeLogin(userName.current?.value || "Guest"));
     }
 
     return (
-        <div className="min-h-screen p-4 flex flex-col gap-6">
-            <label>Login
+        <div className="min-h-screen p-4 flex flex-col justify-center text-center gap-7">
+            <label className={"font-bold "}>Login
                 <input
-                    className={"p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95"}
+                    className={"p-4 ms-5 ml-12 border-custom w-45 text-center transition-transform duration-300 active:scale-95"}
                     type={"text"} ref={userName}></input>
             </label>
-            <label>Password
+            <label className={'font-bold'}>Password
                 <input
-                    className={"p-4 border-custom w-32 text-center transition-transform duration-300 active:scale-95"}
+                    className={"p-4 ms-5 border-custom w-45 text-center transition-transform duration-300 active:scale-95"}
                     type={"text"}></input>
             </label>
             <NavLink to={"/game"}>
