@@ -1,20 +1,15 @@
-import {CHANGE_LOGIN} from "../actions/userAction.ts";
-import type {ActionInterface, StateInterface} from "../utils/types.ts";
+import {CHANGE_LOGIN, DECREASE_SCORE, INCREASE_SCORE} from "../actions/userAction.ts";
+import type {StateInterface, Action} from "../utils/types.ts";
 import {initialState} from "../configureStore/store.ts";
-// const initialState = {
-//     user: {
-//         login: '',
-//         password: ''
-//     },
-//     scores: {
-//         score: 0,
-//     }
-// };
 
-export const userReducer = (state: StateInterface = initialState, action: ActionInterface) => {
+export const userReducer = (state: StateInterface = initialState, action: Action): StateInterface => {
     switch (action.type) {
         case CHANGE_LOGIN:
-            return {...state,user: {login: action.payload + ""}} as StateInterface;
+            return {...state, user: {...state.user, login: action.payload + ""}} as StateInterface;
+        case INCREASE_SCORE:
+            return {...state, scores: {...state.scores, score: state.scores.score + action.payload}};
+        case DECREASE_SCORE:
+            return {...state, scores: {...state.scores, score: state.scores.score - action.payload}};
         default:
             return state as StateInterface;
     }

@@ -1,14 +1,23 @@
-export interface StateInterface {
+import type {CHANGE_LOGIN} from "../actions/userAction.ts";
 
+export interface StateInterface {
     user: {
-        login: '',
-            password: ''
+        login: string,
+        password: string,
     },
     scores: {
-        score: 0,
+        score: number
     }
 }
-export interface ActionInterface {
-    type: string;
-    payload: string|number;
+
+export interface UserActionInterface {
+    type: typeof CHANGE_LOGIN,
+    payload: string
 }
+
+export interface ScoresActionInterface {
+    type: string,
+    payload: number
+}
+
+export type Action = UserActionInterface | ScoresActionInterface;
