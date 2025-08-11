@@ -3,8 +3,16 @@ import Game from "./components/Game.tsx";
 import Login from "./components/Login.tsx";
 import {store} from "./configureStore/store.ts";
 import {Provider} from "react-redux";
+import { collection, getDocs } from "firebase/firestore";
+import {db} from "./data/firestore.ts"
 
 const App = () => {
+       getDocs(collection(db, "users")).then(querySnapshot =>
+        querySnapshot.forEach((doc) => {
+            console.log(`${doc.id} => ${doc.data()}`);
+        })
+    )
+
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#1a1a4f] to-[#000032]
