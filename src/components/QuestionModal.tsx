@@ -1,6 +1,10 @@
+
 import {useState} from "react";
-import {useDispatch} from "react-redux";
-import {decreaseScore, increaseScore} from "../actions/userAction.ts";
+import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
+import {decreaseScore, increaseScore} from "../features/scoreSlice.ts";
+import {updateDoc,doc} from "firebase/firestore";
+import {db} from "../data/firestore.ts";
+
 
 interface Props {
     title: string,
@@ -12,14 +16,26 @@ interface Props {
 
 const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
     const [showAnswer, setShowAnswer] = useState(false);
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
+    const id = useAppSelector(state => state.userLayer.id);
+    const oldScore = useAppSelector(state => state.score.scores.score)
 
-    function increase(amount: number) {
-        dispatch(increaseScore(amount));
+    function increase(price: number) {
+        dispatch(increaseScore(price));
     }
 
-    function decrease(amount: number) {
-        dispatch(decreaseScore(amount));
+    function decrease(price: number) {
+        dispatch(decreaseScore(price));
+    }
+
+    async function increaseScoreInDB() {
+        const userRef = doc(db, 'users', id)
+        await updateDoc(userRef, {score: oldScore + price})
+    }
+
+    async function decreaseScoreInDB() {
+        const userRef = doc(db, 'users', id)
+        await updateDoc(userRef, {score: oldScore - price})
     }
 
     return (
@@ -40,12 +56,14 @@ const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
                         <div className="flex items-center justify-center w-full">User answered correctly?</div>
                         <button className="btn-yellow"
                                 onClick={() => {
+                                    increaseScoreInDB();
                                     increase(price);
                                     onClose()
                                 }}> YES
                         </button>
                         <button className="btn-yellow"
                                 onClick={() => {
+                                    decreaseScoreInDB()
                                     decrease(price)
                                     onClose();
                                 }}> NO
