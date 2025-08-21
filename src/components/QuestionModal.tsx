@@ -1,9 +1,8 @@
 
 import {useState} from "react";
 import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {decreaseScore, increaseScore} from "../features/scoreSlice.ts";
-import {updateDoc,doc} from "firebase/firestore";
-import {db} from "../data/firestore.ts";
+import { fetchScoreUpdateDB} from "../features/scoreSlice.ts";
+
 
 
 interface Props {
@@ -20,23 +19,33 @@ const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
     const id = useAppSelector(state => state.userLayer.id);
     const oldScore = useAppSelector(state => state.score.scores.score)
 
-    function increase(price: number) {
-        dispatch(increaseScore(price));
+    function changeScore(price: number) {
+        dispatch(fetchScoreUpdateDB({price, oldScore, id}));
     }
 
-    function decrease(price: number) {
-        dispatch(decreaseScore(price));
-    }
+    // function increase(price: number) {
+    //     dispatch(increaseScore(price));
+    // }
+    //
+    // function decrease(price: number) {
+    //     dispatch(decreaseScore(price));
+    // }
+    //
+    // async function increaseScoreInDB() {
+    //     const userRef = doc(db, 'users', id)
+    //     await updateDoc(userRef, {score: oldScore + price})
+    // }
+    //
+    // async function decreaseScoreInDB() {
+    //     const userRef = doc(db, 'users', id)
+    //     await updateDoc(userRef, {score: oldScore - price})
+    // }
+    // async function changeScore (price: number) {
+    //     const userRef = doc(db, 'users', id)
+    //     const newScore = oldScore + price
+    //     await updateDoc(userRef, {score: newScore});
+    //     dispatch(changeStoreScore(newScore))
 
-    async function increaseScoreInDB() {
-        const userRef = doc(db, 'users', id)
-        await updateDoc(userRef, {score: oldScore + price})
-    }
-
-    async function decreaseScoreInDB() {
-        const userRef = doc(db, 'users', id)
-        await updateDoc(userRef, {score: oldScore - price})
-    }
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
@@ -56,15 +65,13 @@ const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
                         <div className="flex items-center justify-center w-full">User answered correctly?</div>
                         <button className="btn-yellow"
                                 onClick={() => {
-                                    increaseScoreInDB();
-                                    increase(price);
+                                    changeScore(price)
                                     onClose()
                                 }}> YES
                         </button>
                         <button className="btn-yellow"
                                 onClick={() => {
-                                    decreaseScoreInDB()
-                                    decrease(price)
+                                    changeScore(-price)
                                     onClose();
                                 }}> NO
                         </button>

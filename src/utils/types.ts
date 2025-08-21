@@ -13,3 +13,7 @@ export interface ScoreStateInterface {
         score: number
     }
 }
+export interface UserInfo {
+    login: string,
+    password: string
+}
