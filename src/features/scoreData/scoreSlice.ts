@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice, type PayloadAction} from "@reduxjs/toolkit";
 import type {ScoreStateInterface} from "../../utils/types.ts";
-import {doc, updateDoc} from "firebase/firestore";
+import {doc, runTransaction} from "firebase/firestore";
 import {db} from "../../data/firestore.ts";
 
 const initialState: ScoreStateInterface = {
@@ -17,13 +17,18 @@ interface ScoreWithId {
 
 export const fetchScoreUpdateDB = createAsyncThunk(
     "user/fetchScoreUpdateDB",
-    async ({price, oldScore, id}: ScoreWithId) => {
+    async ({price, id}: ScoreWithId) => {
         const userRef = doc(db, 'users', id);
-        if (!userRef) {
-            throw new Error("Not found 404");
-        }
-        const newScore = oldScore + price;
-        await updateDoc(userRef, {score: newScore});
+        const newScore = await runTransaction(db, async (transaction) => {
+            const snapshot = await transaction.get(userRef);
+            if (!snapshot.exists()) {
+                throw new Error('User not found');
+            }
+            const current = (snapshot.data()?.score ?? 0) as number;
+            const updated = current + price;
+            transaction.update(userRef, { score: updated });
+            return updated;
+        });
         return newScore;
     }
 );
