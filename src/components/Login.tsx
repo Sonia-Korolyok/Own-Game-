@@ -3,6 +3,7 @@ import {useNavigate} from "react-router-dom";
 import {useAppDispatch} from "../app/hooks.ts";
 import {fetchUserCheckExistInDB} from "../features/userData/userDataSlice.ts";
 import {NavLink} from "react-router";
+import {changeScore} from "../features/scoreData/scoreSlice.ts";
 
 // Register and Login
 const Login = () => {
@@ -16,10 +17,17 @@ const Login = () => {
         const login = userNameRef.current!.value;
         const password = passwordRef.current!.value;
         if (login && password) {
-            dispatch(fetchUserCheckExistInDB({login, password}));
-            // todo ... dispatch(changeScore(fetchedUser.score))
-            // todo ... dispatch(fetchScoreFromDB(userId))
-            navigate("/game");
+            dispatch(fetchUserCheckExistInDB({login, password}))
+                .unwrap()
+                .then((payload) => {
+                    if (typeof payload?.score === "number") {
+                        dispatch(changeScore(payload.score));
+                    }
+                    navigate("/game");
+                })
+                .catch(() => {
+                    alert("Неверный логин или пароль");
+                });
         } else {
             alert("Please fill in all fields");
         }

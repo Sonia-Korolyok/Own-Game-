@@ -4,7 +4,7 @@ import QuestionModal from "./QuestionModal.tsx";
 import PageHeader from "./PageHeader.tsx";
 import {useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
-import {fetchTopics, seedTopics} from "../features/topics/topicsSlice.ts";
+import {fetchTopics, seedTopics, initializeBoard} from "../features/topics/topicsSlice.ts";
 
 const Game = () => {
 
@@ -26,7 +26,13 @@ const Game = () => {
         // Загружаем топики; если пусто — сначала сеедим, потом перезагружаем
         dispatch(fetchTopics()).then((action: any) => {
             if (Array.isArray(action.payload) && action.payload.length === 0) {
-                dispatch(seedTopics()).then(() => dispatch(fetchTopics()));
+                dispatch(seedTopics()).then(() => dispatch(fetchTopics())).then((a: any) => {
+                    if (Array.isArray(a.payload)) {
+                        dispatch(initializeBoard(a.payload));
+                    }
+                });
+            } else if (Array.isArray(action.payload)) {
+                dispatch(initializeBoard(action.payload));
             }
         });
     }, [dispatch]);

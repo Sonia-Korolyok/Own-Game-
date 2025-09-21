@@ -1,7 +1,7 @@
 import {Route, Routes} from "react-router";
 import Game from "./components/Game.tsx";
 import Login from "./components/Login.tsx";
-import {collection, getDocs} from "firebase/firestore";
+import {doc, getDoc} from "firebase/firestore";
 import {db} from "./data/firestore.ts";
 import {useEffect} from "react";
 import {useAppDispatch} from "./app/hooks.ts";
@@ -9,6 +9,7 @@ import {changeScore} from "./features/scoreData/scoreSlice.ts";
 import {changeId, changeLogin} from "./features/userData/userDataSlice.ts";
 import Registration from "./components/Registration.tsx";
 import {runTopicsMigration} from "./data/migrate.ts";
+import AnswersHistory from "./components/AnswersHistory.tsx";
 
 
 const App = () => {
@@ -18,20 +19,18 @@ const App = () => {
     useEffect(() => {
         runTopicsMigration();
         const userId = localStorage.getItem("userId");
-        console.log(userId);
-        getDocs(collection(db, "users"))
-            .then(querySnapshot => {
-                querySnapshot.forEach((doc) => {
-                    if (doc.id === userId) {
-                        const user = doc.data();
-                        console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
-                        dispatch(changeScore(user.score));
-                        dispatch(changeLogin(user.login));
-                        dispatch(changeId(user.id));
-                    }
-                    // Миграция топиков при первом старте
-                });
+        if (userId) {
+            const ref = doc(db, "users", userId);
+            getDoc(ref).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const user = snapshot.data() as { login?: string; score?: number };
+                    dispatch(changeScore(user.score ?? 0));
+                    dispatch(changeLogin(user.login ?? ""));
+                    // id из snapshot.id, в документе поля id нет
+                    dispatch(changeId(snapshot.id));
+                }
             });
+        }
     }, []);
 
     return (
@@ -42,6 +41,7 @@ const App = () => {
                 <Route path="/register" element={<Registration/>}/>
                 <Route path="/" element={<Login/>}/>
                 <Route path="/login" element={<Login/>}/>
+                <Route path="/history" element={<AnswersHistory/>}/>
             </Routes>
 
         </div>

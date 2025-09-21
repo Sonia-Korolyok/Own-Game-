@@ -1,6 +1,8 @@
 import {useState} from "react";
 import {useAppDispatch, useAppSelector} from "../app/hooks.ts";
 import {fetchScoreUpdateDB} from "../features/scoreData/scoreSlice.ts";
+import {markAnswered} from "../features/topics/topicsSlice.ts";
+import {addAnswerToHistory} from "../features/answers/answersSlice.ts";
 
 
 interface Props {
@@ -19,6 +21,10 @@ const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
 
 
     function changeScore(price: number) {
+        if (!id) {
+            alert("Сохранение очков доступно только для авторизованных пользователей");
+            return;
+        }
         dispatch(fetchScoreUpdateDB({price, oldScore, id}));
     }
 
@@ -40,12 +46,32 @@ const QuestionModal = ({title, price, question, answer, onClose}: Props) => {
                         <div className="flex items-center justify-center w-full">User answered correctly?</div>
                         <button className="btn-yellow"
                                 onClick={() => {
+                                    dispatch(markAnswered({ title, price, result: 'correct' }));
+                                    if (id) {
+                                        dispatch(addAnswerToHistory({ userId: id, answer: {
+                                                title,
+                                                price,
+                                                question,
+                                                result: 'correct',
+                                                answeredAt: Date.now()
+                                            }}));
+                                    }
                                     changeScore(price)
                                     onClose()
                                 }}> YES
                         </button>
                         <button className="btn-yellow"
                                 onClick={() => {
+                                    dispatch(markAnswered({ title, price, result: 'wrong' }));
+                                    if (id) {
+                                        dispatch(addAnswerToHistory({ userId: id, answer: {
+                                                title,
+                                                price,
+                                                question,
+                                                result: 'wrong',
+                                                answeredAt: Date.now()
+                                            }}));
+                                    }
                                     changeScore(-price)
                                     onClose();
                                 }}> NO

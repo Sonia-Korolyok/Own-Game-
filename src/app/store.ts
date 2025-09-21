@@ -2,32 +2,46 @@ import {combineReducers, configureStore, type UnknownAction} from "@reduxjs/tool
 import userDataSlice from "../features/userData/userDataSlice.ts";
 import scoreSlice from "../features/scoreData/scoreSlice.ts";
 import topicsReducer from "../features/topics/topicsSlice.ts";
-//todo to configure with redux-persist
+import answersReducer from "../features/answers/answersSlice.ts";
+import storage from "redux-persist/lib/storage";
+import {persistReducer, persistStore, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER} from "redux-persist";
 
-export const logOutAction = () => ({type:'LOGOUT'})
+export const logOutAction = () => ({type: 'LOGOUT'})
 
 const appReducer = combineReducers({
     userLayer: userDataSlice,
     score: scoreSlice,
     topics: topicsReducer,
+    answers: answersReducer,
 })
 
-// 1. Получаем тип стейта корневого редюсера
-type AppState = ReturnType<typeof appReducer>;
-
-// 2. Явно типизируем параметры:
-const logOutReducer = (state: AppState | undefined, action: UnknownAction): AppState => {
-    if (action.type === "LOGOUT") {
+// Корневой редюсер с очисткой состояния при LOGOUT
+const rootReducer = (state: ReturnType<typeof appReducer> | undefined, action: UnknownAction) => {
+    if (action.type === 'LOGOUT') {
         state = undefined;
     }
     return appReducer(state, action);
 };
 
-export const store = configureStore({
-    reducer: logOutReducer,
+const persistConfig = {
+    key: 'root',
+    storage,
+    whitelist: ['userLayer', 'score', 'topics', 'answers'],
+};
 
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+    reducer: persistedReducer,
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+            },
+        }),
 });
 
+export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

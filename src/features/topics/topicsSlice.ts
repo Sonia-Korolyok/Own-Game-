@@ -6,10 +6,16 @@ import {topics as seedTopicsData} from "../../data/questions.ts";
 
 interface TopicsState {
     topics: Topic[];
+    // Для каждого топика и цены храним индекс выбранного вопроса в исходном массиве
+    selectedIndexByTitleAndPrice: Record<string, Record<number, number>>;
+    // Статус ответа по ячейке (correct | wrong)
+    answeredStatusByTitleAndPrice: Record<string, Record<number, 'correct' | 'wrong'>>;
 }
 
 const initialState: TopicsState = {
-    topics: []
+    topics: [],
+    selectedIndexByTitleAndPrice: {},
+    answeredStatusByTitleAndPrice: {},
 }
 
 export const fetchTopics = createAsyncThunk< Topic[] >(
@@ -37,7 +43,37 @@ export const seedTopics = createAsyncThunk(
 const topicsSlice = createSlice({
     name: "topics",
     initialState,
-    reducers: {},
+    reducers: {
+        initializeBoard(state, action: PayloadAction<Topic[] | undefined>) {
+            const topics = action.payload ?? state.topics;
+            const prices = [100, 200, 300, 400, 500];
+            const selected: Record<string, Record<number, number>> = {};
+            topics.forEach((t) => {
+                const byPrice: Record<number, number[]> = {};
+                t.questions.forEach((q, idx) => {
+                    if (!byPrice[q.price]) byPrice[q.price] = [];
+                    byPrice[q.price].push(idx);
+                });
+                selected[t.title] = {};
+                prices.forEach((p) => {
+                    const ids = byPrice[p] || [];
+                    if (ids.length > 0) {
+                        const rand = Math.floor(Math.random() * ids.length);
+                        selected[t.title][p] = ids[rand];
+                    }
+                });
+            });
+            state.selectedIndexByTitleAndPrice = selected;
+            state.answeredStatusByTitleAndPrice = {};
+        },
+        markAnswered(state, action: PayloadAction<{ title: string; price: number; result: 'correct' | 'wrong' }>) {
+            const {title, price, result} = action.payload;
+            if (!state.answeredStatusByTitleAndPrice[title]) {
+                state.answeredStatusByTitleAndPrice[title] = {} as Record<number, 'correct' | 'wrong'>;
+            }
+            state.answeredStatusByTitleAndPrice[title][price] = result;
+        }
+    },
     extraReducers: (builder: ActionReducerMapBuilder<TopicsState>) => {
         builder
             .addCase(fetchTopics.fulfilled, (state: TopicsState, {payload}: PayloadAction<Topic[]>) => {
@@ -46,5 +82,6 @@ const topicsSlice = createSlice({
     }
 });
 
+export const { initializeBoard, markAnswered } = topicsSlice.actions;
 export default topicsSlice.reducer;
 
