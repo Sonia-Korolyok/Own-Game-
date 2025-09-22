@@ -153,7 +153,8 @@ export const topics: Topic[] = [
       { price: 400, question: "Что такое optimistic update в RTK Query?", answer: "Предварительное обновление состояния до ответа сервера."},
       { price: 400, question: "Что такое transformResponse?", answer: "Позволяет изменять данные ответа перед сохранением в store."},
       { price: 400, question: "Что такое keepUnusedDataFor?", answer: "Настройка времени хранения неиспользуемых данных в кеше."},
-      { price: 400, question: "Что такое refetchOnMount?", answer: "Настройка повторного запроса данных при монтировании компонента."},
+      { price: 400, question: "Что такое refetchOnMount?", answer: "Флаг в настройках запроса. Позволяет управлять запросом в зависимост от монтирования компонента. " +
+              "Значения: true, false, 'always'(кастомное условие)."},
       { price: 500, question: "Что такое optimistic concurrency в RTK?", answer: "Обновление состояния с учётом возможных конфликтов с сервером."},
       { price: 500, question: "Что такое invalidationTags и как они помогают?", answer: "Позволяют автоматически обновлять кеш после мутаций."},
       { price: 500, question: "Что такое createEntityAdapter?", answer: "Утилита для управления коллекциями сущностей в store."},
